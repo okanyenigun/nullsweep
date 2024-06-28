@@ -55,6 +55,6 @@ print("Detected Pattern:", pattern)
 print("Details:", details)
 ```
 
-## Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests, open issues, or suggest improvements.
