@@ -36,7 +36,7 @@ print("Detected Pattern:", pattern)
 print("Details:", details)
 ```
 
-### Detect Feature-Specific Patterns
+### Detect Feature-Specific Patterns
 
 To detect missing data patterns in a specific feature of a pandas DataFrame:
 
