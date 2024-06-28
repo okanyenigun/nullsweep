@@ -50,3 +50,5 @@ _map.html
 .cache
 .pytest_cache
 tests/baseline/
+
+run.py

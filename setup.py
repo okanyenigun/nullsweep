@@ -38,6 +38,7 @@ setup(
         'statsmodels==0.14.2'
         ],
     extras_require={
+        'dev': ['twine==5.1.1'],
         'test': ['pytest==8.2.2']
     },
     python_requires='>=3.7',
