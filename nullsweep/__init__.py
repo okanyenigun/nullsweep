@@ -1,1 +1,3 @@
-from .api import detect_global_pattern, detect_feature_pattern
+from .api import *
+
+__version__ = '0.1.0'

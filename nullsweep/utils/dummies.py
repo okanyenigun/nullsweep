@@ -82,3 +82,50 @@ class Dummy:
         df.loc[missing_indices, 'A'] = np.nan
         return df
     
+
+    @staticmethod
+    def create_sample_dataframe(num_rows: int=10) -> pd.DataFrame:
+        """
+        Creates a pandas DataFrame with 3 continuous features, 
+        3 categorical (string) features, and 1 datetime feature.
+        Each column will have a random number of null values.
+
+        Args:
+            num_rows (int): The number of rows in the DataFrame.
+
+        Returns:
+            pd.DataFrame: A DataFrame with mixed data types.
+        """
+        
+        # Continuous features
+        np.random.seed(42)  # For reproducibility
+        continuous_1 = np.random.normal(loc=50, scale=10, size=num_rows)
+        continuous_2 = np.random.normal(loc=100, scale=20, size=num_rows)
+        continuous_3 = np.random.normal(loc=0, scale=5, size=num_rows)
+        
+        # Categorical features
+        categories = ['A', 'B', 'C']
+        categorical_1 = np.random.choice(categories, size=num_rows)
+        categorical_2 = np.random.choice(['X', 'Y'], size=num_rows)
+        categorical_3 = np.random.choice(['Yes', 'No'], size=num_rows)
+        
+        # Datetime feature
+        datetime_feature = pd.date_range(start='2023-01-01', periods=num_rows, freq='D')
+        
+        # Create DataFrame
+        df = pd.DataFrame({
+            'continuous_1': continuous_1,
+            'continuous_2': continuous_2,
+            'continuous_3': continuous_3,
+            'categorical_1': categorical_1,
+            'categorical_2': categorical_2,
+            'categorical_3': categorical_3,
+            'datetime_feature': datetime_feature
+        })
+
+        for col in df.columns:
+            num_nulls = np.random.randint(1, num_rows)  # Random number of nulls
+            null_indices = np.random.choice(df.index, num_nulls, replace=False)  # Random indices for nulls
+            df.loc[null_indices, col] = np.nan
+        
+        return df 
