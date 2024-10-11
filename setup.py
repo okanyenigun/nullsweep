@@ -7,10 +7,9 @@ with open("Readme.md", "r") as f:
 
 setup(
     name="nullsweep",
-    version="0.1.0",
+    version="0.1.1",
     description="A comprehensive Python package for managing and analyzing missing data in pandas DataFrames, starting with detection and expanding to complete handling.",
-    package_dir={"": "nullsweep"},
-    packages=find_packages(where="nullsweep"),
+    packages=find_packages(),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/okanyenigun/nullsweep",
