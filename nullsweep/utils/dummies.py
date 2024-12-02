@@ -129,3 +129,12 @@ class Dummy:
             df.loc[null_indices, col] = np.nan
         
         return df 
+    
+    @staticmethod
+    def introduce_random_missingness(df, lower_threshold=0.1, upper_threshold=0.3):
+        for column in df.columns:
+            random_percentage = np.random.uniform(lower_threshold, upper_threshold)
+            num_nulls = int(len(df) * random_percentage)
+            null_indices = np.random.choice(df.index, size=num_nulls, replace=False)
+            df.loc[null_indices, column] = np.nan
+        return df
