@@ -53,3 +53,5 @@ tests/baseline/
 
 run.py
 sil.py
+legacy
+notes.txt
