@@ -7,7 +7,7 @@ with open("Readme.md", "r") as f:
 
 setup(
     name="nullsweep",
-    version="0.2.0",
+    version="0.3.0",
     description="A comprehensive Python package for managing and analyzing missing data in pandas DataFrames, starting with detection and expanding to complete handling.",
     packages=find_packages(),
     long_description=long_description,
@@ -36,6 +36,10 @@ setup(
         'scipy==1.13.1',
         'statsmodels==0.14.2',
         'scikit-learn==1.5.1',
+        'seaborn==0.13.2',
+        'missingno==0.5.2',
+        'upsetplot==0.9.0',
+        'wordcloud==1.9.4',
         ],
     extras_require={
         'dev': ['twine==5.1.1'],

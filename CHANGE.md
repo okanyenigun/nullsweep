@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2025-01-22
+
+### Added
+
+- A visualization module has been added, including the plot_missing_values function in the API.
+
+- The following packages have been added as dependencies: seaborn==0.13.2, missingno==0.5.2, upsetplot==0.9.0, wordcloud==1.9.4
+
 ## [0.2.0] - 2024-12-03
 
 ### Added

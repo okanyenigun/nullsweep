@@ -1,7 +1,9 @@
 import pandas as pd
-from typing import Any, Dict, Tuple, Optional, Iterable, Union
+import matplotlib.pyplot as plt
+from typing import Any, Dict, Tuple, Optional, Iterable, Union, Literal
 from .patterns.df import DatasetPatternManager
 from .patterns.feature import FeaturePatternManager
+from .visualization.funcs import PLOT_FUNCTIONS
 from .router import HandlingRouter
 
 
@@ -65,14 +67,15 @@ def detect_feature_pattern(df: pd.DataFrame, feature_name: str) -> Tuple[str, Di
     return pattern, data
 
 
-def impute_nulls(df: pd.DataFrame, 
-                column: Optional[Union[Iterable, str]] = None, 
-                strategy: str = "auto",
-                fill_value: Optional[Any] = None,
-                strategy_params: Optional[Dict[str, Any]] = None,
-                in_place: bool = True,
-                **kwargs
-                ) -> pd.DataFrame:
+def impute_nulls(
+        df: pd.DataFrame, 
+        column: Optional[Union[Iterable, str]] = None, 
+        strategy: str = "auto",
+        fill_value: Optional[Any] = None,
+        strategy_params: Optional[Dict[str, Any]] = None,
+        in_place: bool = True,
+        **kwargs
+        ) -> pd.DataFrame:
     """
     Impute missing values in a DataFrame using a specified strategy or an automated decision-making process.
 
@@ -166,4 +169,54 @@ def impute_nulls(df: pd.DataFrame,
     df = operator.fit_transform(df)
 
     return df
-   
+
+
+def plot_missing_values(
+        df: pd.DataFrame,
+        plot_type: Literal['heatmap', 'correlation', 'percentage', 'matrix', 'dendogram', 
+                           'upset_plot', 'pair', 'wordcloud', 'histogram'],
+        **kwargs
+        ) -> None:
+    """
+    Visualize missing values in a DataFrame using various plot types.
+
+    This function provides an interface to visualize missing data in a DataFrame through a variety of customizable plots, 
+    including heatmaps, correlation maps, bar charts, and more. Each plot type highlights missing data patterns to 
+    facilitate understanding and decision-making regarding data cleaning and preprocessing.
+
+    Args:
+        df (pd.DataFrame):
+            The input DataFrame containing the data to analyze for missing values.
+        plot_type (Literal):
+            The type of plot to generate. Options include:
+
+            - 'heatmap': Visualize missing data using a heatmap.
+            - 'correlation': Show correlations between missing data in different columns.
+            - 'percentage': Display the percentage of missing values per column as a bar chart.
+            - 'matrix': Visualize the missing data structure with a matrix plot.
+            - 'dendogram': Use a dendrogram to highlight clustering of missingness patterns.
+            - 'upset_plot': Display intersections of missing data patterns as an upset plot.
+            - 'pair': Create a pair plot that incorporates missing data patterns.
+            - 'wordcloud': Visualize missing data proportions as a word cloud of column names.
+            - 'histogram': Plot a histogram of the number of missing values per row.
+        **kwargs:
+            Additional keyword arguments to pass to the underlying plot function, if applicable.
+
+    Raises:
+        ValueError: If an invalid plot_type is provided.
+
+    Returns:
+        None
+
+    Examples:
+        >>> plot_missing_values(df, plot_type='heatmap')
+        >>> plot_missing_values(df, plot_type='percentage')
+    """
+    
+    if plot_type in PLOT_FUNCTIONS:
+        fig = PLOT_FUNCTIONS[plot_type](df, **kwargs)
+        plt.close(fig)
+    else:
+        raise ValueError(f"Invalid plot_type '{plot_type}'. Choose from {list(PLOT_FUNCTIONS.keys())}.")
+
+    return fig
