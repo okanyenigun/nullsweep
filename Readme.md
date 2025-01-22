@@ -8,6 +8,7 @@ NullSweep is a Python library designed for detecting and handling patterns of mi
 - Detect missing data patterns in specific features/columns of a DataFrame.
 - Impute missing data in specific features or across the entire DataFrame using a variety of strategies.
 - Utilizes a modular approach with different pattern detection and imputation strategies.
+- Visualize missing data patterns for better understanding and analysis.
 
 ## Installation
 
@@ -167,6 +168,15 @@ df = ns.impute_nulls(df, strategy="listwise")
 # Create missing flags for multiple columns in new columns
 df = ns.impute_nulls(df, column=['Age', 'Gender'], strategy="flag")
 
+```
+
+### Visualize Missing Values
+
+Options: 'heatmap', 'correlation', 'percentage', 'matrix', 'dendogram', 'upset_plot', 'pair', 'wordcloud', 'histogram'
+
+```python
+
+figure = ns.plot_missing_values(df, "heatmap")
 ```
 
 ## Contributing
