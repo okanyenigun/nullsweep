@@ -1,6 +1,7 @@
-import pandas as pd
 from typing import Any, Dict, Tuple
-from ..mar.logistic_regression import MARLogisticRegression
+from ..mar.polars_lr import MarLRPolars
+from ..mar.pandas_lr import MarLRPandas
+from ...config import DataType
 
 
 class MarBasedDetection:
@@ -8,23 +9,25 @@ class MarBasedDetection:
     A class to decide the missing data pattern detection method and determine the pattern.
     
     Attributes:
-        _methods (Dict[str, Any]): A dictionary mapping method names to their corresponding classes.
+        _methods (Dict[str, Dict[str, MarTypeLogisticDetector]]): A dictionary mapping method names to their corresponding classes.
     """
 
     def __init__(self):
         self._methods: Dict[str, Any] = {
-            "logistic": MARLogisticRegression,
+            "logistic": {
+                "pandas": MarLRPandas,
+                "polars": MarLRPolars,
+            },
         }
 
-    def decide(self, method: str, df: pd.DataFrame, feature: str, *args, **kwargs) -> Tuple[str, Dict[str, Any]]:
+    def decide(self, method: str, df: DataType, feature: str, **kwargs) -> Tuple[str, Dict[str, Any]]:
         """
         Decides the missing data pattern based on the specified method.
         
         Args:
             method (str): The method to use for detection (e.g., "logistic").
-            df (pd.DataFrame): The DataFrame containing the data.
+            df (DataType): The DataFrame containing the data.
             feature (str): The feature/column to check for missing data patterns.
-            *args: Additional arguments to pass to the method class.
             **kwargs: Additional keyword arguments to pass to the method class.
         
         Returns:
@@ -36,8 +39,17 @@ class MarBasedDetection:
         if method not in self._methods:
             raise ValueError(f"Unsupported method '{method}'. Supported methods are: {list(self._methods.keys())}")
         
-        operator = self._methods.get(method)(df, feature, *args, **kwargs)
-        flag, data = operator.detect_pattern()
+        engine = df.__module__.split(".")[0]
+
+        if engine not in self._methods.get(method):
+            raise ValueError(f"Unsupported engine '{engine}' for method '{method}'." 
+                             f"Supported engines are: {list(self._methods.get(method).keys())}")
+        
+        service_instance = self._methods.get(method).get(engine)
+        service = service_instance(df, feature, **kwargs)
+
+        flag, data = service.detect_pattern()
+        
         pattern = "MAR" if flag else "MCAR"
         
         return pattern, data

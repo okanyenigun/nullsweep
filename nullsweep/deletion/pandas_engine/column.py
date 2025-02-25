@@ -1,18 +1,17 @@
 import pandas as pd
 from typing import List, Union, Optional
-from ..bases.handler import AHandler
+from ...bases.handler import AHandler
 
 
-class ColumnDeleter(AHandler):
+class ColumnDeleterPandas(AHandler):
     """
     A class to delete columns from a DataFrame.
     """
-
     def __init__(self, column: Optional[Union[str, List[str]]]=None):
         self.columns = column
         self.columns_to_delete = None
 
-    def fit(self, df: pd.DataFrame) -> 'ColumnDeleter':
+    def fit(self, df: pd.DataFrame) -> 'ColumnDeleterPandas':
         if self.columns is None:
             self.columns_to_delete = df.columns[df.isnull().any()].tolist()
         else:

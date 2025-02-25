@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from nullsweep.impute.single.interpolate import LinearInterpolationImputer
+from nullsweep.impute.single.pandas_engine.interpolate import LinearInterpolationImputer
 
 
 def test_linear_interpolation_imputer_initialization():

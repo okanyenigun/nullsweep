@@ -2,10 +2,10 @@ import pytest
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from nullsweep.impute.single.manager import SingleImputationManager  # Replace with correct import path
-from nullsweep.impute.single.categorical import SingleCategoricalImputer
-from nullsweep.impute.single.interpolate import LinearInterpolationImputer
-from nullsweep.impute.single.direction import DirectionFillImputer
-from nullsweep.impute.single.decision import SingleImputationStrategyDecider
+from nullsweep.impute.single.pandas_engine.categorical import SingleCategoricalImputer
+from nullsweep.impute.single.pandas_engine.interpolate import LinearInterpolationImputer
+from nullsweep.impute.single.pandas_engine.direction import DirectionFillImputer
+from nullsweep.impute.single.pandas_engine.decision import SingleImputationStrategyDecider
 from nullsweep.utils.structs import Structs
 
 

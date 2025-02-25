@@ -1,9 +1,9 @@
 import pandas as pd
 from typing import Optional, Union, Iterable
-from ..bases.handler import AHandler
+from ...bases.handler import AHandler
 
 
-class MissingIndicator(AHandler):
+class MissingIndicatorPandas(AHandler):
     """
     A class to generate a binary indicator column for missing values
     in a specified column.
@@ -22,7 +22,7 @@ class MissingIndicator(AHandler):
         self.indicator_column_suffix = indicator_column_suffix
         self.indicator_column_names = None
 
-    def fit(self, df: pd.DataFrame) -> 'MissingIndicator':
+    def fit(self, df: pd.DataFrame) -> 'MissingIndicatorPandas':
         if self.column is None:
             self.column = df.columns.tolist()
         elif isinstance(self.column, str):

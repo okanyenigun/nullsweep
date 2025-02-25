@@ -1,9 +1,9 @@
 import pandas as pd
 from typing import Union
-from ..bases.handler import AHandler
+from ...bases.handler import AHandler
 
 
-class ListWiseDeleter(AHandler):
+class ListWiseDeleterPandas(AHandler):
     """
     A class to delete rows from a DataFrame based on the number of missing values in each row.
     """
@@ -25,7 +25,7 @@ class ListWiseDeleter(AHandler):
         self.threshold = threshold
         self.condition = None
 
-    def fit(self, df: pd.DataFrame) -> 'ListWiseDeleter':
+    def fit(self, df: pd.DataFrame) -> 'ListWiseDeleterPandas':
         if isinstance(self.threshold, int):
             self.condition = df.isnull().sum(axis=1) < self.threshold
         elif isinstance(self.threshold, float) and 0 <= self.threshold <= 1:

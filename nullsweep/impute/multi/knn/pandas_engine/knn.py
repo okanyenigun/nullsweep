@@ -1,7 +1,8 @@
 import pandas as pd
 from sklearn.impute import KNNImputer
 from typing import Optional, Union, Iterable
-from ...bases.handler import AHandler
+from .....bases.handler import AHandler
+from .....utils.decorators import to_pandas
 
 
 class KNNImputerWrapper(AHandler):
@@ -17,6 +18,7 @@ class KNNImputerWrapper(AHandler):
         self.imputer = None
         self.target_columns = None  # Columns to be imputed
 
+    @to_pandas
     def fit(self, df: pd.DataFrame) -> 'KNNImputerWrapper':
         if self.column is None:
             self.target_columns = df.columns[df.isnull().any()].tolist()
@@ -40,6 +42,7 @@ class KNNImputerWrapper(AHandler):
 
         return self
 
+    @to_pandas
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.imputer is None:
             raise ValueError("The imputer has not been fitted yet. Call 'fit' first.")

@@ -1,10 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from copy import deepcopy
 from typing import Any, Dict, Tuple, Optional, Iterable, Union, Literal
 from .patterns.df import DatasetPatternManager
 from .patterns.feature import FeaturePatternManager
 from .visualization.funcs import PLOT_FUNCTIONS
-from .router import HandlingRouter
+from .router import ImputeFactory
+from .config import DataType
+
 
 
 GLOBAL_PATTERN_DETECTION_APPROACH = "coarse"
@@ -12,12 +15,12 @@ FEATURE_PATTERN_DETECT_APPROACH = "mar_based"
 MAR_BASED_PATTERN_DETECT_METHOD = "logistic"
 
 
-def detect_global_pattern(df: pd.DataFrame) -> Tuple[str, Dict[str, Any]]:
+def detect_global_pattern(df: DataType) -> Tuple[str, Dict[str, Any]]:
     """
     Detects the global pattern of missing data in the DataFrame.
 
     Args:
-        df (pd.DataFrame): The DataFrame containing the data.
+        df (DataType): The DataFrame containing the data.
 
     Returns:
         Tuple[str, Dict[str, Any]]: A tuple containing the detected pattern and the detailed result.
@@ -26,38 +29,31 @@ def detect_global_pattern(df: pd.DataFrame) -> Tuple[str, Dict[str, Any]]:
         TypeError: If the input 'df' is not a pandas DataFrame.
         ValueError: If the input DataFrame is empty.
     """
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("The input 'df' must be a pandas DataFrame.")
-    
-    if df.empty:
-        raise ValueError("The input DataFrame is empty. Please provide a DataFrame with data.")
-    
+    if not isinstance(df, DataType):
+        raise TypeError(f"Unsupported data type. Please provide a pandas or Polars DataFrame. Sent: {type(df)}")
+
     manager = DatasetPatternManager()
     pattern, data = manager.detect_pattern(GLOBAL_PATTERN_DETECTION_APPROACH, df)
     return pattern, data
 
 
-def detect_feature_pattern(df: pd.DataFrame, feature_name: str) -> Tuple[str, Dict[str, Any]]:
+def detect_feature_pattern(df: DataType, feature_name: str) -> Tuple[str, Dict[str, Any]]:
     """
     Detects the pattern of missing data in the specified feature of the DataFrame.
 
     Args:
-        df (pd.DataFrame): The DataFrame containing the data.
+        df (DataType): The DataFrame containing the data.
         feature_name (str): The feature/column to check for patterns.
 
     Returns:
         Tuple[str, Dict[str, Any]]: A tuple containing the detected pattern and the detailed result.
 
     Raises:
-        TypeError: If the input 'df' is not a pandas DataFrame.
-        ValueError: If the input DataFrame is empty.
+        TypeError: If the input 'df' is not a DataType.
         ValueError: If the specified feature is not found in the DataFrame columns.
     """
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("The input 'df' must be a pandas DataFrame.")
-    
-    if df.empty:
-        raise ValueError("The input DataFrame is empty. Please provide a DataFrame with data.")
+    if not isinstance(df, DataType):
+        raise TypeError("The input 'df' must be a pandas or Polars DataFrame.")
     
     if feature_name not in df.columns:
         raise ValueError(f"The specified feature '{feature_name}' is not found in the DataFrame columns. Please provide a valid feature name.")
@@ -68,7 +64,7 @@ def detect_feature_pattern(df: pd.DataFrame, feature_name: str) -> Tuple[str, Di
 
 
 def impute_nulls(
-        df: pd.DataFrame, 
+        df: DataType, 
         column: Optional[Union[Iterable, str]] = None, 
         strategy: str = "auto",
         fill_value: Optional[Any] = None,
@@ -85,8 +81,8 @@ def impute_nulls(
     and interpolation-based methods.
 
     Args:
-        df (pd.DataFrame): 
-            The input pandas DataFrame to process. Must not be empty.
+        df (DataType): 
+            The input pandas DataFrame to process.
         column (Optional[Union[Iterable, str]]): 
             The target column(s) to apply the imputation on. Can be a single column name (str), 
             a list of column names (Iterable), or None. If None, all columns with missing values 
@@ -95,9 +91,9 @@ def impute_nulls(
             The imputation strategy to use. Supports a variety of strategies, including:
             - For continuous features: "mean", "median", "most_frequent", "constant", 
               "interpolate", "backfill", "forwardfill".
-            - For categorical features: "most_frequent", "constant", "least_frequent", 
+            - For categorical features: "most_frequent", "constant", 
               "backfill", "forwardfill".
-            - For date features: "interpolate", "backfill", "forwardfill".
+            - For date features: "interpolate", "backfill"
             - "auto": Automatically decides the best strategy based on the data.
         fill_value (Optional[Any]): 
             The value to use for imputation when the strategy is "constant".
@@ -117,7 +113,7 @@ def impute_nulls(
             The DataFrame with missing values imputed according to the specified strategy.
 
     Raises:
-        TypeError: If `df` is not a pandas DataFrame.
+        TypeError: If `df` is not a DataType.
         ValueError: If `df` is empty or if no columns contain missing values.
         RuntimeError: If no suitable handler is found for the specified strategy or column type.
 
@@ -153,18 +149,17 @@ def impute_nulls(
         print("Warning! The 'feature' argument is deprecated. Please use 'column' instead.")
         column = column if column else kwargs.get("feature", None)
 
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("Input `df` must be a pandas DataFrame.")
-    
-    if df.empty:
-        raise ValueError("Input DataFrame is empty. Please provide a DataFrame with data.")
+    if not isinstance(df, DataType):
+        raise TypeError("Input `df` must be a pandas or polars DataFrame.")
     
     if not in_place:
-        df = df.copy()
+        df = deepcopy(df)
 
-    router = HandlingRouter()
+    factory = ImputeFactory()
 
-    operator = router.route(strategy, column, fill_value, strategy_params, **kwargs)
+    data_engine = df.__module__.split(".")[0]
+
+    operator = factory.create_imputer(strategy, data_engine, column, fill_value, strategy_params, **kwargs)
 
     df = operator.fit_transform(df)
 

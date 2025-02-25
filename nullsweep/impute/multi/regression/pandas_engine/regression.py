@@ -2,7 +2,8 @@ import pandas as pd
 from sklearn.base import clone
 from sklearn.linear_model import LinearRegression
 from typing import Optional, Union, Iterable, Any
-from ...bases.handler import AHandler
+from .....bases.handler import AHandler
+from .....utils.decorators import to_pandas
 
 
 class RegressionImputer(AHandler):
@@ -28,6 +29,7 @@ class RegressionImputer(AHandler):
         self.estimators = {}
         self.predictor_strategy = predictor_strategy
 
+    @to_pandas
     def fit(self, df):
         if self.column is None:
             self.column = df.columns[df.isnull().any()].tolist()
@@ -61,6 +63,7 @@ class RegressionImputer(AHandler):
         else:
             raise ValueError(f"Unknown predictor strategy: {self.predictor_strategy}")
     
+    @to_pandas
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         if not self.estimators:
             raise ValueError("The imputer has not been fitted yet. Call 'fit' first.")

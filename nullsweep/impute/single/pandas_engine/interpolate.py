@@ -1,8 +1,8 @@
 import pandas as pd
-from ...bases.handler import AHandler
+from ....bases.handler import AHandler
 
 
-class LinearInterpolationImputer(AHandler):
+class LinearInterpolationImputerPandas(AHandler):
 
     """
     A class that applies linear interpolation to impute missing values in a pandas Series.
@@ -14,7 +14,7 @@ class LinearInterpolationImputer(AHandler):
         self.method = method
         self.is_fitted = False
 
-    def fit(self, df: pd.DataFrame) -> "LinearInterpolationImputer":
+    def fit(self, df: pd.DataFrame) -> "LinearInterpolationImputerPandas":
         self.is_fitted = True
         return self
     
@@ -25,4 +25,3 @@ class LinearInterpolationImputer(AHandler):
         
         df[self.column] = df[self.column].interpolate(method=self.method, limit_direction='both')
         return df
-    

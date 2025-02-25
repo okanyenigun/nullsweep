@@ -1,22 +1,17 @@
 import pandas as pd
 from typing import Union, Any, Dict, Optional, Iterable
-from .pandas_engine.categorical import SingleCategoricalImputer
-from .pandas_engine.continuous import SimpleImputerWrapper
-from .pandas_engine.interpolate import LinearInterpolationImputer
-from .pandas_engine.direction import DirectionFillImputer
-from .pandas_engine.decision import SingleImputationStrategyDecider
-from .polars_engine.continuous import SimpleImputerWrapperPolars
-from .polars_engine.categorical import SingleCategoricalImputerPolars
-from .polars_engine.interpolate import LinearInterpolationImputerPolars
-from .polars_engine.direction import DirectionFillImputerPolars
-from ...utils.structs import Structs
+from .categorical import SingleCategoricalImputer
+from .continuous import SimpleImputerWrapper
+from .interpolate import LinearInterpolationImputerPandas
+from .direction import DirectionFillImputer
+from .decision import SingleImputationStrategyDecider
+from ....utils.structs import Structs
 
 
-class SingleImputer:
+class SingleImputationPandas:
     """
     A wrapper for single imputations using dynamic strategy selection.
     """
-
     def __init__(self, 
                  impute_strategy: str, 
                  column: Optional[Union[Iterable, str]] = None,
@@ -32,7 +27,6 @@ class SingleImputer:
             fill_value (Optional[Any], optional): The fill value to use for constant imputation. Defaults to None.
             strategy_params (Optional[Dict[str, Any]], optional): Additional parameters to pass to the imputer. Defaults to None.
         """
-        
         if not isinstance(impute_strategy, str):
             raise TypeError("`impute_strategy` must be a string.")
         
@@ -43,56 +37,30 @@ class SingleImputer:
         self.imputers = {} 
         self._decider = strategy_decider()
         self._imputers = {
-            "pandas":{
-                "continuous": {
-                    "mean": SimpleImputerWrapper,
-                    "median": SimpleImputerWrapper,
-                    "most_frequent": SimpleImputerWrapper,
-                    "constant": SimpleImputerWrapper,
-                    "interpolate": LinearInterpolationImputer,
-                    "backfill": DirectionFillImputer,
-                    "forwardfill": DirectionFillImputer,
-                },
-                "categorical": {
-                    "most_frequent": SingleCategoricalImputer,
-                    "constant": SingleCategoricalImputer,
-                    "least_frequent": SingleCategoricalImputer,
-                    "backfill": DirectionFillImputer,
-                    "forwardfill": DirectionFillImputer,
-                },
-                "date":{
-                    "interpolate": LinearInterpolationImputer,
-                    "backfill": DirectionFillImputer,
-                    "forwardfill": DirectionFillImputer,
-                }
+            "continuous": {
+                "mean": SimpleImputerWrapper,
+                "median": SimpleImputerWrapper,
+                "most_frequent": SimpleImputerWrapper,
+                "constant": SimpleImputerWrapper,
+                "interpolate": LinearInterpolationImputerPandas,
+                "backfill": DirectionFillImputer,
+                "forwardfill": DirectionFillImputer,
             },
-            "polars": {
-                "continuous": {
-                    "mean": SimpleImputerWrapperPolars,
-                    "median": SimpleImputerWrapperPolars,
-                    "most_frequent": SimpleImputerWrapperPolars,
-                    "constant": SimpleImputerWrapperPolars,
-                    "interpolate": LinearInterpolationImputerPolars,
-                    "backfill": DirectionFillImputerPolars,
-                    "forwardfill": DirectionFillImputerPolars,
-                },
-                "categorical": {
-                    "most_frequent": SingleCategoricalImputerPolars,
-                    "constant": SingleCategoricalImputerPolars,
-                    "least_frequent": SingleCategoricalImputerPolars,
-                    "backfill": DirectionFillImputerPolars,
-                    "forwardfill": DirectionFillImputerPolars,
-                },
-                "date": {
-                    "interpolate": LinearInterpolationImputerPolars,
-                    "backfill": DirectionFillImputerPolars,
-                    "forwardfill": DirectionFillImputerPolars,
-                }
+            "categorical": {
+                "most_frequent": SingleCategoricalImputer,
+                "constant": SingleCategoricalImputer,
+                "least_frequent": SingleCategoricalImputer,
+                "backfill": DirectionFillImputer,
+                "forwardfill": DirectionFillImputer,
+            },
+            "date":{
+                "interpolate": LinearInterpolationImputerPandas,
+                "backfill": DirectionFillImputer,
+                "forwardfill": DirectionFillImputer,
             }
-            
         }
 
-    def fit(self, df: pd.DataFrame) -> "SingleImputer":
+    def fit(self, df: pd.DataFrame) -> "SingleImputationPandas":
         self.column = self._determine_columns(df)
         for col in self.column:
             # Determine strategy if "auto"
@@ -151,7 +119,7 @@ class SingleImputer:
         self.strategy_params["column"] = column
 
         # Add fill_value if specified
-        if self.fill_value:
+        if self.fill_value is not None:
             self.strategy_params["fill_value"] = self.fill_value
 
         return
@@ -172,4 +140,3 @@ class SingleImputer:
         # Initialize the imputer for this column
         self.imputers[column] = imputer(**self.strategy_params)
         return
-    

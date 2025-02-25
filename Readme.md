@@ -2,6 +2,8 @@
 
 NullSweep is a Python library designed for detecting and handling patterns of missing data in pandas DataFrames. This tool provides a simple API to identify global missing data patterns across the entire dataset, patterns related to specific features within the dataset, and to impute missing values using various strategies.
 
+It supports **pandas** and **polars** DataFrames.
+
 ## Features
 
 - Detect global patterns of missing data in a DataFrame.

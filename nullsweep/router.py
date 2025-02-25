@@ -1,49 +1,52 @@
 from typing import Any, Dict, Iterable, Optional, Union
-from .deletion.column import ColumnDeleter
-from .deletion.listwise import ListWiseDeleter
-from .flag.indicator import MissingIndicator
-from .impute.multi.knn import KNNImputerWrapper
-from .impute.multi.mice import MICEImputer
-from .impute.multi.regression import RegressionImputer
-from .impute.single.manager import SingleImputationWrapper
+from .deletion.factory import ColumnDeleterFactory
+from .deletion.factory import ListWiseDeleterFactory
+from .flag.factory import MissingIndicatorFactory
+from .impute.multi.knn.factory import KnnFactory
+from .impute.multi.mice.factory import MiceFactory
+from .impute.multi.regression.factory import RegressionFactory
+from .impute.single.factory import SimpleImputeFactory
 from .bases.handler import AHandler
 from .utils.structs import Structs
 
 
-class HandlingRouter:
+class ImputeFactory:
 
     def __init__(self):
         self._methods = {
-            "delete_column": ColumnDeleter,
-            "listwise":ListWiseDeleter,
-            "flag": MissingIndicator,
-            "knn": KNNImputerWrapper,
-            "mice": MICEImputer,
-            "regression": RegressionImputer,
-            "mean": SingleImputationWrapper,
-            "median":SingleImputationWrapper,
-            "most_frequent":SingleImputationWrapper,
-            "least_frequent":SingleImputationWrapper,
-            "constant":SingleImputationWrapper,
-            "interpolate": SingleImputationWrapper,
-            "backfill": SingleImputationWrapper,
-            "forwardfill": SingleImputationWrapper,
-            "auto": SingleImputationWrapper,
+            "delete_column": ColumnDeleterFactory,
+            "listwise": ListWiseDeleterFactory,
+            "flag": MissingIndicatorFactory,
+            "knn": KnnFactory,
+            "mice": MiceFactory,
+            "regression": RegressionFactory,
+            "mean": SimpleImputeFactory,
+            "median": SimpleImputeFactory,
+            "most_frequent": SimpleImputeFactory,
+            "constant": SimpleImputeFactory,
+            "interpolate": SimpleImputeFactory,
+            "backfill": SimpleImputeFactory,
+            "forwardfill": SimpleImputeFactory,
+            "auto": SimpleImputeFactory,
         }
 
-    def route(self, 
-              strategy: str, 
-              column: Optional[Union[Iterable, str]], 
-              fill_value: Optional[Any], 
-              strategy_params: Optional[Dict[str, Any]], 
-              **kwargs
-              ) -> AHandler:
+    def create_imputer(
+            self, 
+            strategy: str, 
+            data_engine: str,
+            column: Optional[Union[Iterable, str]], 
+            fill_value: Optional[Any], 
+            strategy_params: Optional[Dict[str, Any]],
+            **kwargs
+            ) -> AHandler:
         
-        operator_class = self._methods.get(strategy)
+        operator_factory = self._methods.get(strategy)
+        if operator_factory is None:
+            raise RuntimeError(f"Unsupported strategy '{strategy}'." 
+                               f"Supported strategies are: {list(self._methods.keys())}")
 
-        if operator_class is None:
-            raise ValueError(f"Strategy {strategy} not found. Available strategies are: {list(self._methods.keys())}")
-        
+        operator_class = operator_factory.get_handler(data_engine)
+
         params = {
             "impute_strategy": strategy,
             "column": column,
@@ -58,3 +61,4 @@ class HandlingRouter:
         operator = operator_class(**atts)
 
         return operator
+

@@ -2,7 +2,8 @@ import pandas as pd
 from sklearn.experimental import enable_iterative_imputer  # noqa
 from sklearn.impute import IterativeImputer
 from typing import Optional, Union, Iterable, Any
-from ...bases.handler import AHandler
+from .....bases.handler import AHandler
+from .....utils.decorators import to_pandas
 
 
 class MICEImputer(AHandler):
@@ -32,6 +33,7 @@ class MICEImputer(AHandler):
         self.imputer = None
         self.target_columns = None
 
+    @to_pandas
     def fit(self, df: pd.DataFrame) -> 'MICEImputer':
         if self.column is None:
             self.target_columns = df.columns[df.isnull().any()].tolist()
@@ -59,6 +61,7 @@ class MICEImputer(AHandler):
 
         return self
 
+    @to_pandas
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.imputer is None:
             raise ValueError("The imputer has not been fitted yet. Call 'fit' first.")

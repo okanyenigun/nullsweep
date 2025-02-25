@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import shapiro
 from unittest.mock import patch, MagicMock
-from nullsweep.impute.single.decision import SingleImputationStrategyDecider
+from nullsweep.impute.single.pandas_engine.decision import SingleImputationStrategyDecider
 from nullsweep.utils.structs import Structs
 
 def test_decide_imputation_strategy_continuous_mean():

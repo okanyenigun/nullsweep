@@ -1,6 +1,8 @@
 import pandas as pd
 from typing import Any, Dict, Tuple
-from .monotone.service import DataFramePatternDetector
+from .monotone.pandas_engine import PandasDFPatternDetector
+from .monotone.polars_engine import PolarsDFPatternDetector
+from ..config import DataType
 
 
 class DatasetPatternManager:
@@ -8,21 +10,23 @@ class DatasetPatternManager:
     A class to manage and detect patterns in datasets using various approaches.
     
     Attributes:
-        _decider (Dict[str, Any]): A dictionary mapping approach names to their corresponding classes.
+        _decider (Dict[str, Dict[str, ADataFramePatternDetector]]): A dictionary mapping approach names to their corresponding classes.
     """
     def __init__(self):
         self._decider = {
-            "coarse": DataFramePatternDetector,
+            "coarse": {
+                "pandas": PandasDFPatternDetector,
+                "polars": PolarsDFPatternDetector,
+            }
         }
 
-    def detect_pattern(self, approach: str, df: pd.DataFrame, *args, **kwargs) -> Tuple[str, Dict[str, Any]]:
+    def detect_pattern(self, approach: str, df: DataType, **kwargs) -> Tuple[str, Dict[str, Any]]:
         """
         Detects the pattern in the dataset using the chosen approach.
         
         Args:
             approach (str): The approach to use for detection (e.g., "coarse").
-            df (pd.DataFrame): The DataFrame containing the data.
-            *args: Additional arguments to pass to the approach class.
+            df (DataType): The DataFrame containing the data.
             **kwargs: Additional keyword arguments to pass to the approach class.
         
         Returns:
@@ -31,10 +35,19 @@ class DatasetPatternManager:
         Raises:
             ValueError: If the specified approach is not supported.
         """
+        engine = df.__module__.split(".")[0]
+
         if approach not in self._decider:
             raise ValueError(f"Unsupported approach '{approach}'. Supported approaches are: {list(self._decider.keys())}")
 
-        decider = self._decider.get(approach)(df, *args, **kwargs)
-        pattern, data = decider.detect_pattern()
+        service_instance = self._decider.get(approach).get(engine)
+
+        if service_instance is None:
+            raise ValueError(f"Unsupported engine '{engine}' for approach '{approach}'" 
+                             f"Supported engines are: {list(self._decider.get(approach).keys())}")
+        
+        service = service_instance(df, **kwargs)
+        pattern, data = service.detect_pattern()
+
         return pattern, data
     

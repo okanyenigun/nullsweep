@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from nullsweep.impute.single.direction import DirectionFillImputer
+from nullsweep.impute.single.pandas_engine.direction import DirectionFillImputer
 
 def test_direction_fill_imputer_initialization():
     # Test valid initialization

@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skew, shapiro
 from typing import Dict, Any, Optional
-from ...utils.structs import Structs
+from ....utils.structs import Structs
+from ....utils.decorators import series_to_pandas
 
 
 class SingleImputationStrategyDecider:
@@ -15,6 +16,7 @@ class SingleImputationStrategyDecider:
         }
         self._thresholds = thresholds if thresholds else self._default_thresholds
 
+    @series_to_pandas
     def decide_imputation_strategy(self, series: pd.Series) -> str:
         """
         Decides the imputation strategy for a given pandas Series

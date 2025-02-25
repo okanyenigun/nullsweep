@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from nullsweep.impute.single.categorical import SingleCategoricalImputer
+from nullsweep.impute.single.pandas_engine.categorical import SingleCategoricalImputer
 
 def test_imputer_initialization_invalid_strategy():
     with pytest.raises(ValueError, match="Strategy must be one of 'most_frequent', 'constant', or 'least_frequent'"):

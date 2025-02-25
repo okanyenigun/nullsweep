@@ -1,5 +1,6 @@
 import inspect
 import pandas as pd
+import polars as pl
 from typing import Type, Dict, Any
 
 
@@ -23,6 +24,27 @@ class Structs:
             return "date"
         elif pd.api.types.is_numeric_dtype(series):
                 return "continuous"
+        else:
+            return "categorical"
+        
+    @staticmethod
+    def detect_series_type_polars(series: pl.Series) -> str:
+        """
+        Detects the type of a Polars Series as one of "continuous", "categorical", or "date".
+
+        Args:
+            series (pl.Series): The Polars Series to be analyzed.
+
+        Returns:
+            str: The type of the series - "continuous", "categorical", or "date".
+        """
+        dtype = series.dtype
+        if dtype.is_temporal():
+            return "date"
+        elif dtype.is_numeric():
+            return "continuous"
+        elif dtype == pl.Categorical:
+            return "categorical"
         else:
             return "categorical"
         
