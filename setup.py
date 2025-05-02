@@ -35,7 +35,7 @@ setup(
         'pandas==2.2.2',
         'scipy==1.13.1',
         'statsmodels==0.14.2',
-        'scikit-learn==1.5.1',
+        'scikit-learn==1.6.1',
         'seaborn==0.13.2',
         'missingno==0.5.2',
         'upsetplot==0.9.0',
