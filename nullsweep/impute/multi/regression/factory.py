@@ -1,4 +1,5 @@
 from .pandas_engine.regression import RegressionImputer
+from .dask_engine.regression import RegressionImputerDask
 
 
 class RegressionFactory:
@@ -6,6 +7,7 @@ class RegressionFactory:
     _handler_map = {
         "pandas": RegressionImputer,
         "polars": RegressionImputer,
+        "dask": RegressionImputerDask,
     }
 
     @staticmethod

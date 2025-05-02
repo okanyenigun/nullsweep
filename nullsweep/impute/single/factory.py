@@ -1,5 +1,6 @@
 from .pandas_engine.manager import SingleImputationPandas
 from .polars_engine.manager import SingleImputationPolars
+from .dask_engine.manager import SingleImputationDask
 
 
 class SimpleImputeFactory:
@@ -7,6 +8,7 @@ class SimpleImputeFactory:
     _handler_map = {
         "pandas": SingleImputationPandas,
         "polars": SingleImputationPolars,
+        "dask": SingleImputationDask
     }
 
     @staticmethod

@@ -16,7 +16,8 @@ class MICEImputer(AHandler):
                  column: Optional[Union[Iterable, str]] = None, 
                  estimator: Optional[Any]=None, 
                  max_iter: int=10, 
-                 random_state: Optional[Any]=None):
+                 random_state: Optional[Any]=None
+                 ):
         """
         Args:
             column (Optional[Union[Iterable, str]], optional): . Defaults to None.
@@ -51,14 +52,14 @@ class MICEImputer(AHandler):
         if not any(df[self.target_columns].isnull().any()):
             raise ValueError("No missing values found in the specified target columns.")
 
-        # Fit the imputer on the entire DataFrame
         self.imputer = IterativeImputer(
-            estimator=self.estimator,
-            max_iter=self.max_iter,
-            random_state=self.random_state,
+        estimator=self.estimator,
+        max_iter=self.max_iter,
+        random_state=self.random_state,
         )
-        self.imputer.fit(df)
 
+        self.imputer.fit(df[self.target_columns])
+        
         return self
 
     @to_pandas
@@ -69,11 +70,13 @@ class MICEImputer(AHandler):
         # Copy the DataFrame to ensure immutability
         df_copy = df.copy()
 
-        # Apply MICE imputation
-        imputed_array = self.imputer.transform(df_copy)
-        imputed_df = pd.DataFrame(imputed_array, columns=df.columns, index=df.index)
+        imputed_array = self.imputer.transform(df_copy[self.target_columns])
+        
+        imputed_df = pd.DataFrame(
+            imputed_array,
+            columns=self.target_columns,
+            index=df_copy.index
+        )
 
-        # Update only the target columns
-        df_copy[self.target_columns] = imputed_df[self.target_columns]
-
+        df_copy[self.target_columns] = imputed_df
         return df_copy

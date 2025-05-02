@@ -6,6 +6,7 @@ class KnnFactory:
     _handler_map = {
         "pandas": KNNImputerWrapper,
         "polars": KNNImputerWrapper,
+        "dask": KNNImputerWrapper,
     }
 
     @staticmethod

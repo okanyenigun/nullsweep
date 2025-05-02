@@ -3,11 +3,9 @@ from ....bases.handler import AHandler
 
 
 class LinearInterpolationImputerPolars(AHandler):
-
-    def __init__(self, column: str, method: str="linear", **kwargs):
+    def __init__(self, column: str, method: str = "linear", **kwargs):
         if method != "linear":
-            raise ValueError(f"Polars only supports linear interpolation. Received method: {method}. Please use 'linear' as the method argument.")
-
+            raise ValueError(f"Polars only supports linear interpolation. Received: {method}")
         self.column = column
         self.method = method
         self.is_fitted = False
@@ -18,11 +16,12 @@ class LinearInterpolationImputerPolars(AHandler):
     
     def transform(self, df: pl.DataFrame) -> pl.DataFrame:
         if not self.is_fitted:
-            raise RuntimeError("This LinearInterpolationImputer instance is not fitted yet. "
-                               "Call 'fit' before calling 'transform'.")
+            raise RuntimeError("Call 'fit' before 'transform'")
         
-        df = df.with_columns(
-            pl.col(self.column).interpolate().alias(self.column)
+        return df.with_columns(
+            pl.col(self.column)
+            .interpolate()  
+            .forward_fill()  
+            .backward_fill() 
+            .alias(self.column)
         )
-        return df
-            

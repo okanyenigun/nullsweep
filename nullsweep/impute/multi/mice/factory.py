@@ -6,6 +6,7 @@ class MiceFactory:
     _handler_map = {
         "pandas": MICEImputer,
         "polars": MICEImputer,
+        "dask": MICEImputer,
     }
 
     @staticmethod

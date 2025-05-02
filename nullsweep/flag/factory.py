@@ -1,5 +1,6 @@
 from .pandas_engine.indicator import MissingIndicatorPandas
 from .polars_engine.indicator import MissingIndicatorPolars
+from .dask_engine.indicator import MissingIndicatorDask
 
 
 class MissingIndicatorFactory:
@@ -7,6 +8,7 @@ class MissingIndicatorFactory:
     _handler_map = {
         "pandas": MissingIndicatorPandas,
         "polars": MissingIndicatorPolars,
+        "dask": MissingIndicatorDask,
     }
 
     @staticmethod

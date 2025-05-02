@@ -2,6 +2,8 @@ from .pandas_engine.column import ColumnDeleterPandas
 from .pandas_engine.listwise import ListWiseDeleterPandas
 from .polars_engine.column import ColumnDeleterPolars
 from .polars_engine.listwise import ListWiseDeleterPolars
+from .dask_engine.column import ColumnDeleterDask
+from .dask_engine.listwise import ListWiseDeleterDask
 from ..bases.handler import AHandler
 
 
@@ -10,6 +12,7 @@ class ColumnDeleterFactory:
     _handler_map = {
         "pandas": ColumnDeleterPandas,
         "polars": ColumnDeleterPolars,
+        "dask": ColumnDeleterDask,
     }
 
     @staticmethod
@@ -25,6 +28,7 @@ class ListWiseDeleterFactory:
     _handler_map = {
         "pandas": ListWiseDeleterPandas,
         "polars": ListWiseDeleterPolars,
+        "dask": ListWiseDeleterDask,
     }
 
     @staticmethod

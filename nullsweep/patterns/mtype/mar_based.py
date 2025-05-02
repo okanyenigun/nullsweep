@@ -1,6 +1,7 @@
 from typing import Any, Dict, Tuple
 from ..mar.polars_lr import MarLRPolars
 from ..mar.pandas_lr import MarLRPandas
+from ..mar.dask_lr import MarLRDask
 from ...config import DataType
 
 
@@ -17,6 +18,7 @@ class MarBasedDetection:
             "logistic": {
                 "pandas": MarLRPandas,
                 "polars": MarLRPolars,
+                "dask": MarLRDask,
             },
         }
 

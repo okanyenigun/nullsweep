@@ -7,8 +7,8 @@ class ColumnDeleterPolars(AHandler):
     A class to delete columns from a Polars DataFrame.
     """
 
-    def __init__(self, columns: Optional[Union[str, List[str]]] = None):
-        self.columns = columns
+    def __init__(self, column: Optional[Union[str, List[str]]] = None):
+        self.columns = column
         self.columns_to_delete = None
 
     def fit(self, df: pl.DataFrame) -> 'ColumnDeleterPolars':

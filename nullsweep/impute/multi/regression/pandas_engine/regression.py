@@ -11,10 +11,12 @@ class RegressionImputer(AHandler):
     Impute missing values using regression models for specified columns.
     """
 
-    def __init__(self, 
-                 column: Optional[Union[str, Iterable[str]]] = None, 
-                 estimator: Optional[Any]=None,
-                 predictor_strategy: str="mean"):
+    def __init__(
+            self, 
+            column: Optional[Union[str, Iterable[str]]] = None, 
+            estimator: Optional[Any]=None,
+            predictor_strategy: str="mean"
+            ):
         """
         Args:
             column (Optional[Union[str, Iterable[str]]], optional): Defaults to None.

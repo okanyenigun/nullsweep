@@ -9,7 +9,6 @@ from .router import ImputeFactory
 from .config import DataType
 
 
-
 GLOBAL_PATTERN_DETECTION_APPROACH = "coarse"
 FEATURE_PATTERN_DETECT_APPROACH = "mar_based"
 MAR_BASED_PATTERN_DETECT_METHOD = "logistic"
@@ -26,11 +25,11 @@ def detect_global_pattern(df: DataType) -> Tuple[str, Dict[str, Any]]:
         Tuple[str, Dict[str, Any]]: A tuple containing the detected pattern and the detailed result.
 
     Raises:
-        TypeError: If the input 'df' is not a pandas DataFrame.
+        TypeError: If the input 'df' is not a DataType.
         ValueError: If the input DataFrame is empty.
     """
     if not isinstance(df, DataType):
-        raise TypeError(f"Unsupported data type. Please provide a pandas or Polars DataFrame. Sent: {type(df)}")
+        raise TypeError(f"Unsupported data type. Please provide a pandas, or Polars DataFrame, or Dask DataFrame. Sent: {type(df)}")
 
     manager = DatasetPatternManager()
     pattern, data = manager.detect_pattern(GLOBAL_PATTERN_DETECTION_APPROACH, df)
@@ -53,7 +52,7 @@ def detect_feature_pattern(df: DataType, feature_name: str) -> Tuple[str, Dict[s
         ValueError: If the specified feature is not found in the DataFrame columns.
     """
     if not isinstance(df, DataType):
-        raise TypeError("The input 'df' must be a pandas or Polars DataFrame.")
+        raise TypeError("The input 'df' must be a pandas or Polars DataFrame, or Dask DataFrame.")
     
     if feature_name not in df.columns:
         raise ValueError(f"The specified feature '{feature_name}' is not found in the DataFrame columns. Please provide a valid feature name.")
@@ -69,7 +68,7 @@ def impute_nulls(
         strategy: str = "auto",
         fill_value: Optional[Any] = None,
         strategy_params: Optional[Dict[str, Any]] = None,
-        in_place: bool = True,
+        in_place: bool = False,
         **kwargs
         ) -> pd.DataFrame:
     """
@@ -150,15 +149,14 @@ def impute_nulls(
         column = column if column else kwargs.get("feature", None)
 
     if not isinstance(df, DataType):
-        raise TypeError("Input `df` must be a pandas or polars DataFrame.")
+        raise TypeError("Input `df` must be a pandas or polars DataFrame, or Dask DataFrame.")
     
     if not in_place:
         df = deepcopy(df)
 
-    factory = ImputeFactory()
-
     data_engine = df.__module__.split(".")[0]
 
+    factory = ImputeFactory()
     operator = factory.create_imputer(strategy, data_engine, column, fill_value, strategy_params, **kwargs)
 
     df = operator.fit_transform(df)
@@ -215,3 +213,4 @@ def plot_missing_values(
         raise ValueError(f"Invalid plot_type '{plot_type}'. Choose from {list(PLOT_FUNCTIONS.keys())}.")
 
     return fig
+

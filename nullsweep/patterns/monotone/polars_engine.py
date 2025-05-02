@@ -17,45 +17,32 @@ class PolarsDFPatternDetector(ADataFramePatternDetector):
         return None
     
     def detect_monotone(self) -> Tuple[bool, pl.DataFrame]:
-        df_na = self.df.select([
-            pl.col(col).is_null().alias(col) for col in self.df.columns
+        df_na_pl = self.df.select([
+            pl.col(c).is_null().alias(c) for c in self.df.columns
         ])
         
         columns_with_missing = [
-            col for col in self.df.columns 
-            if df_na.select(pl.col(col)).sum()[0, 0] > 0
+            c for c in df_na_pl.columns
+            if df_na_pl.select(pl.col(c).sum()).to_series()[0] > 0
         ]
-        
-        if not columns_with_missing:
-            return False, pl.DataFrame()
-        
-        column_pairs = list(itertools.permutations(columns_with_missing, 2))
-        
-        monotone_matrix = pl.DataFrame(
-            {col: [False] * len(columns_with_missing) for col in columns_with_missing},
-            schema={col: pl.Boolean for col in columns_with_missing}
+
+        n = len(columns_with_missing)
+        monotone_dict = {c: [False]*n for c in columns_with_missing}
+
+        for i, col1 in enumerate(columns_with_missing):
+            for j, col2 in enumerate(columns_with_missing):
+                if col1 == col2:
+                    continue
+
+                is_monotone = df_na_pl.select(
+                    (pl.col(col2) | ~pl.col(col1)).all().alias("m")
+                ).to_series()[0]
+                monotone_dict[col1][j] = bool(is_monotone)
+
+        monotone_matrix_pl = pl.DataFrame(monotone_dict)
+
+        monotone_property = any(
+            any(row) for row in monotone_dict.values()
         )
-        monotone_matrix = monotone_matrix.with_columns(
-            pl.Series(name="index", values=columns_with_missing)
-        )
-        
-        for col1, col2 in column_pairs:
-            is_monotone = df_na.select(
-                (pl.col(col2) | ~pl.col(col1)).all()
-            )[0, 0]
-            
-            if is_monotone:
-                monotone_matrix = monotone_matrix.with_columns(
-                    pl.when(pl.col("index") == col1)
-                    .then(pl.lit(True))
-                    .otherwise(pl.col(col2))
-                    .alias(col2)
-                )
-        
-        monotone = monotone_matrix.select(
-            pl.exclude("index")
-        ).select(pl.all().any()).select(pl.all().any())[0, 0]
-        
-        monotone_matrix = monotone_matrix.drop("index")
-        
-        return monotone, monotone_matrix
+
+        return monotone_property, monotone_matrix_pl

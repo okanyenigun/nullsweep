@@ -1,7 +1,7 @@
-import pandas as pd
 from typing import Any, Dict, Tuple
 from .monotone.pandas_engine import PandasDFPatternDetector
 from .monotone.polars_engine import PolarsDFPatternDetector
+from .monotone.dask_engine import DaskDFPatternDetector
 from ..config import DataType
 
 
@@ -17,6 +17,7 @@ class DatasetPatternManager:
             "coarse": {
                 "pandas": PandasDFPatternDetector,
                 "polars": PolarsDFPatternDetector,
+                "dask": DaskDFPatternDetector,
             }
         }
 

@@ -138,3 +138,74 @@ class Dummy:
             null_indices = np.random.choice(df.index, size=num_nulls, replace=False)
             df.loc[null_indices, column] = np.nan
         return df
+    
+    @staticmethod
+    def generate_mar_test_data(num_samples=1000, seed=42):
+        """
+        Generates a synthetic dataset with MAR and MCAR missing patterns.
+        
+        Args:
+            num_samples (int): Number of samples to generate
+            seed (int): Random seed for reproducibility
+        
+        Returns:
+            pd.DataFrame: DataFrame with:
+            - age: Normally distributed values
+            - income: Right-skewed values
+            - missing_feature_mar: Feature with MAR missingness (dependent on income)
+            - missing_feature_mcar: Feature with MCAR missingness
+            - noise: Random noise feature
+        """
+        np.random.seed(seed)
+        
+        # Base features
+        data = pd.DataFrame({
+            'age': np.random.normal(40, 15, num_samples).astype(int),
+            'income': np.random.gamma(shape=2, scale=20000, size=num_samples).astype(int),
+            'noise': np.random.uniform(0, 1, num_samples)
+        })
+        
+        # Create MAR missingness (dependent on income)
+        income_threshold = np.percentile(data['income'], 75)
+        mar_missing_mask = data['income'] > income_threshold
+        data['missing_feature_mar'] = np.random.normal(0, 1, num_samples)
+        data.loc[mar_missing_mask, 'missing_feature_mar'] = np.nan
+        
+        # Create MCAR missingness (completely random)
+        mcar_missing_mask = np.random.rand(num_samples) < 0.3
+        data['missing_feature_mcar'] = np.random.normal(0, 1, num_samples)
+        data.loc[mcar_missing_mask, 'missing_feature_mcar'] = np.nan
+        
+        # Add some non-missing related features
+        data['age'] = np.clip(data['age'], 18, 100)
+        data['income'] = np.clip(data['income'], 20000, 150000)
+        
+        return data
+    
+    @staticmethod
+    def generate_6_cols(n_rows: int = 100, random_state: int = None) -> pd.DataFrame:
+        rng = np.random.RandomState(random_state)
+        
+        # Base DataFrame
+        df = pd.DataFrame({
+            "A_no_nulls": rng.normal(size=n_rows),
+            "B_some_nulls": rng.normal(size=n_rows),
+            "C_no_nulls_int": rng.randint(0, 10, size=n_rows),
+            "D_some_nulls_str": rng.choice(["foo", "bar", "baz"], size=n_rows),
+            "E_all_nulls": np.nan,
+            "F_some_nulls": rng.normal(size=n_rows),
+        })
+        
+        # Introduce ~33% nulls in B_some_nulls
+        idx_b = rng.choice(n_rows, size=n_rows // 3, replace=False)
+        df.loc[idx_b, "B_some_nulls"] = np.nan
+        
+        # Introduce ~25% nulls in D_some_nulls_str
+        idx_d = rng.choice(n_rows, size=n_rows // 4, replace=False)
+        df.loc[idx_d, "D_some_nulls_str"] = None
+
+        # Introduce ~50% nulls in F_some_nulls
+        idx_f = rng.choice(n_rows, size=n_rows // 2, replace=False)
+        df.loc[idx_f, "F_some_nulls"] = np.nan
+        
+        return df
