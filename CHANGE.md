@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-04-25
+
+### Added
+
+- Compatibility with dask dataframes.
+
 ## [0.4.0] - 2025-02-25
 
 ### Added
