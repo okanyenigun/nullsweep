@@ -7,7 +7,7 @@ with open("Readme.md", "r") as f:
 
 setup(
     name="nullsweep",
-    version="0.5.0",
+    version="0.6.0",
     description="A comprehensive Python package for managing and analyzing missing data in pandas DataFrames, starting with detection and expanding to complete handling.",
     packages=find_packages(),
     long_description=long_description,
