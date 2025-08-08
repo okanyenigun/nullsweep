@@ -9,16 +9,23 @@ try:
 except ImportError:
     _HAS_DASK = False
 
+try:
+    from pyspark.sql import DataFrame as SparkDataFrame
+    _HAS_SPARK = True
+except ImportError:
+    _HAS_SPARK = False
+
 
 def to_pandas(func):
     """
-    Decorator to convert Polars or Dask DataFrames in function arguments to Pandas DataFrames,
-    then convert back to the original type (Polars or Dask) on output.
+    Decorator to convert Polars, Dask, or Spark DataFrames in function arguments to Pandas DataFrames,
+    then convert back to the original type (Polars, Dask, or Spark) on output.
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         orig_type = None
         orig_nparts = None
+        orig_spark_session = None
 
         # Convert args
         new_args = []
@@ -33,6 +40,12 @@ def to_pandas(func):
                 new_args.append(arg.compute())
                 if orig_type is None:
                     orig_type = 'dask'
+            elif _HAS_SPARK and isinstance(arg, SparkDataFrame):
+                # Convert to pandas, record spark session
+                orig_spark_session = arg.sql_ctx.sparkSession
+                new_args.append(arg.toPandas())
+                if orig_type is None:
+                    orig_type = 'spark'
             else:
                 new_args.append(arg)
 
@@ -48,6 +61,11 @@ def to_pandas(func):
                 new_kwargs[key] = val.compute()
                 if orig_type is None:
                     orig_type = 'dask'
+            elif _HAS_SPARK and isinstance(val, SparkDataFrame):
+                orig_spark_session = val.sql_ctx.sparkSession
+                new_kwargs[key] = val.toPandas()
+                if orig_type is None:
+                    orig_type = 'spark'
             else:
                 new_kwargs[key] = val
 
@@ -79,6 +97,15 @@ def to_pandas(func):
                         return dd.from_pandas(r, npartitions=orig_nparts)
                     return r
                 return type(result)(_convert(r) for r in result)
+        elif orig_type == 'spark' and _HAS_SPARK:
+            if isinstance(result, pd.DataFrame):
+                return orig_spark_session.createDataFrame(result)
+            if isinstance(result, (list, tuple)):
+                def _convert_spark(r):
+                    if isinstance(r, pd.DataFrame):
+                        return orig_spark_session.createDataFrame(r)
+                    return r
+                return type(result)(_convert_spark(r) for r in result)
 
         return result
 

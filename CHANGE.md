@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2025-08-09
+
+### Added
+
+- Compatibility with spark dataframes.
+
 ## [0.5.0] - 2025-04-25
 
 ### Added

@@ -4,8 +4,7 @@ from typing import Tuple, Union
 from .base import ADataFramePatternDetector
 
 try:
-    from pyspark.sql import DataFrame as SparkDataFrame
-    from pyspark.sql.functions import col, isnan, isnull, when, count, sum as spark_sum
+    from pyspark.sql.functions import col, isnan
     SPARK_AVAILABLE = True
 except ImportError:
     SparkDataFrame = None
@@ -17,6 +16,25 @@ class SparkDFPatternDetector(ADataFramePatternDetector):
     PySpark DataFrame pattern detector for missing data patterns.
     """
 
+    def _is_numeric_column(self, column_name: str) -> bool:
+        """Check if a column is numeric type."""
+        column_type = dict(self.df.dtypes)[column_name]
+        numeric_types = ['int', 'bigint', 'float', 'double', 'decimal']
+        return any(numeric_type in column_type.lower() for numeric_type in numeric_types)
+
+    def _get_missing_condition(self, column_name: str):
+        """Get the appropriate missing value condition based on column type."""
+        if self._is_numeric_column(column_name):
+            return col(column_name).isNull() | isnan(col(column_name))
+        else:
+            # For string columns, also check for common string representations of missing values
+            return (col(column_name).isNull() | 
+                   (col(column_name) == "") | 
+                   (col(column_name) == "NaN") | 
+                   (col(column_name) == "nan") |
+                   (col(column_name) == "null") |
+                   (col(column_name) == "NULL"))
+
     def detect_univariate(self) -> Union[str, None]:
         if not SPARK_AVAILABLE:
             raise ImportError(
@@ -25,8 +43,8 @@ class SparkDFPatternDetector(ADataFramePatternDetector):
         # Count missing values per column
         missing_counts = {}
         for column in self.df.columns:
-            missing_count = self.df.filter(
-                col(column).isNull() | isnan(col(column))).count()
+            missing_condition = self._get_missing_condition(column)
+            missing_count = self.df.filter(missing_condition).count()
             missing_counts[column] = missing_count
 
         # Check for univariate pattern
@@ -47,7 +65,7 @@ class SparkDFPatternDetector(ADataFramePatternDetector):
 
         # Create boolean DataFrame for missing values
         missing_df = self.df.select([
-            (col(c).isNull() | isnan(col(c))).alias(c)
+            self._get_missing_condition(c).alias(c)
             for c in self.df.columns
         ])
 

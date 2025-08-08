@@ -1,5 +1,6 @@
 from .pandas_engine.regression import RegressionImputer
 from .dask_engine.regression import RegressionImputerDask
+from .spark_engine.regression import RegressionImputerSpark
 
 
 class RegressionFactory:
@@ -8,6 +9,7 @@ class RegressionFactory:
         "pandas": RegressionImputer,
         "polars": RegressionImputer,
         "dask": RegressionImputerDask,
+        "pyspark": RegressionImputerSpark,
     }
 
     @staticmethod

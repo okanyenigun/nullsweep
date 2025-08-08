@@ -147,14 +147,21 @@ def impute_nulls(
     if "feature" in kwargs:
         print("Warning! The 'feature' argument is deprecated. Please use 'column' instead.")
         column = column if column else kwargs.get("feature", None)
+    
+    if "feature_name" in kwargs:
+        print("Warning! The 'feature_name' argument is deprecated. Please use 'column' instead.")
+        column = column if column else kwargs.get("feature_name", None)
 
     if not isinstance(df, DataType):
         raise TypeError("Input `df` must be a pandas or polars DataFrame, or Dask DataFrame.")
     
-    if not in_place:
-        df = deepcopy(df)
-
     data_engine = df.__module__.split(".")[0]
+    
+    if not in_place:
+        if data_engine == "pyspark":
+            df = df.select("*")
+        else:
+            df = deepcopy(df)
 
     factory = ImputeFactory()
     operator = factory.create_imputer(strategy, data_engine, column, fill_value, strategy_params, **kwargs)

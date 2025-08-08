@@ -7,6 +7,7 @@ class KnnFactory:
         "pandas": KNNImputerWrapper,
         "polars": KNNImputerWrapper,
         "dask": KNNImputerWrapper,
+        "pyspark": KNNImputerWrapper,
     }
 
     @staticmethod

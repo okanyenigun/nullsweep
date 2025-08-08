@@ -1,6 +1,7 @@
 from .pandas_engine.indicator import MissingIndicatorPandas
 from .polars_engine.indicator import MissingIndicatorPolars
 from .dask_engine.indicator import MissingIndicatorDask
+from .spark_engine.indicator import MissingIndicatorSpark
 
 
 class MissingIndicatorFactory:
@@ -9,6 +10,7 @@ class MissingIndicatorFactory:
         "pandas": MissingIndicatorPandas,
         "polars": MissingIndicatorPolars,
         "dask": MissingIndicatorDask,
+        "pyspark": MissingIndicatorSpark,
     }
 
     @staticmethod

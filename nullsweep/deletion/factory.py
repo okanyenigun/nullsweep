@@ -4,6 +4,8 @@ from .polars_engine.column import ColumnDeleterPolars
 from .polars_engine.listwise import ListWiseDeleterPolars
 from .dask_engine.column import ColumnDeleterDask
 from .dask_engine.listwise import ListWiseDeleterDask
+from .spark_engine.column import ColumnDeleterSpark
+from .spark_engine.listwise import ListWiseDeleterSpark
 from ..bases.handler import AHandler
 
 
@@ -13,6 +15,7 @@ class ColumnDeleterFactory:
         "pandas": ColumnDeleterPandas,
         "polars": ColumnDeleterPolars,
         "dask": ColumnDeleterDask,
+        "pyspark": ColumnDeleterSpark,
     }
 
     @staticmethod
@@ -29,6 +32,7 @@ class ListWiseDeleterFactory:
         "pandas": ListWiseDeleterPandas,
         "polars": ListWiseDeleterPolars,
         "dask": ListWiseDeleterDask,
+        "pyspark": ListWiseDeleterSpark,
     }
 
     @staticmethod

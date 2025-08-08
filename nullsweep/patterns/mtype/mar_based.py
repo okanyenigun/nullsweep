@@ -2,6 +2,7 @@ from typing import Any, Dict, Tuple
 from ..mar.polars_lr import MarLRPolars
 from ..mar.pandas_lr import MarLRPandas
 from ..mar.dask_lr import MarLRDask
+from ..mar.spark_lr import MarLRSpark
 from ...config import DataType
 
 
@@ -19,6 +20,7 @@ class MarBasedDetection:
                 "pandas": MarLRPandas,
                 "polars": MarLRPolars,
                 "dask": MarLRDask,
+                "pyspark": MarLRSpark,
             },
         }
 
@@ -42,6 +44,9 @@ class MarBasedDetection:
             raise ValueError(f"Unsupported method '{method}'. Supported methods are: {list(self._methods.keys())}")
         
         engine = df.__module__.split(".")[0]
+        # Map pyspark module to pyspark engine name
+        if engine in ("pyspark", "spark", "spark_engine"):
+            engine = "pyspark"
 
         if engine not in self._methods.get(method):
             raise ValueError(f"Unsupported engine '{engine}' for method '{method}'." 

@@ -7,6 +7,7 @@ class MiceFactory:
         "pandas": MICEImputer,
         "polars": MICEImputer,
         "dask": MICEImputer,
+        "pyspark": MICEImputer,
     }
 
     @staticmethod
